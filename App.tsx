@@ -43,7 +43,7 @@ export default function App() {
 
         {/* Tabs */}
         <Stack.Screen
-          name="Tabs"
+          name="Retour"
           component={TabNavigator}
           options={{ headerShown: false }}
         />

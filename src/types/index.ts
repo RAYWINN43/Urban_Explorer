@@ -26,5 +26,5 @@ export interface Lieu {
     address_street: string | null;
     address_zipcode: string | null;
     address_city: string | null;
-    price_detail: number | null;
+    price_detail: string | null;
 }

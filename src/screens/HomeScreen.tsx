@@ -34,8 +34,6 @@ export default function HomeScreen() {
       try {
         const response = await apiClient.get('');
 
-        console.log('Données API :', response.data);
-
         setLieux(response.data.results);
       } catch (err: any) {
         setError(err.message || 'Erreur lors du chargement');

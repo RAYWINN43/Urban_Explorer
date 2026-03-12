@@ -1,7 +1,17 @@
-import React from 'react';
-import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Alert,
+  Button
+} from 'react-native';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
+import * as Calendar from 'expo-calendar';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 type LieuDetailRouteProp = RouteProp<RootStackParamList, 'LieuDetailScreen'>;
 
@@ -9,17 +19,84 @@ interface Props {
   route: LieuDetailRouteProp;
 }
 
-const LieuDetailScreen: React.FC<Props> = ({ route }) => {
+export default function LieuDetailScreen({ route }: Props) {
+
   const { lieu } = route.params;
+
+  const [date, setDate] = useState(new Date());
+  const [time, setTime] = useState(new Date());
+
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+
+  const onChangeDate = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) setDate(selectedDate);
+  };
+
+  const onChangeTime = (event: any, selectedTime?: Date) => {
+    setShowTimePicker(false);
+    if (selectedTime) setTime(selectedTime);
+  };
+
+  const addEventToCalendar = async () => {
+    try {
+
+      const { status } = await Calendar.requestCalendarPermissionsAsync();
+
+      if (status !== 'granted') {
+        Alert.alert('Permission refusée', "Impossible d'accéder au calendrier.");
+        return;
+      }
+
+      const calendars = await Calendar.getCalendarsAsync(
+        Calendar.EntityTypes.EVENT
+      );
+
+      const writableCalendar = calendars.find(
+        (calendar) => calendar.allowsModifications
+      );
+
+      if (!writableCalendar) {
+        Alert.alert('Erreur', 'Aucun calendrier disponible pour écrire un événement.');
+        return;
+      }
+
+      // fusion date + heure
+      const startDate = new Date(date);
+      startDate.setHours(time.getHours());
+      startDate.setMinutes(time.getMinutes());
+
+      const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+
+      await Calendar.createEventAsync(writableCalendar.id, {
+        title: lieu.title ?? 'Événement',
+        startDate,
+        endDate,
+        notes: lieu.description?.replace(/<[^>]*>/g, '') ?? '',
+        location: `${lieu.address_name ?? ''} ${lieu.address_city ?? ''}`
+      });
+
+      Alert.alert('Succès', 'Événement ajouté au calendrier.');
+
+    } catch (error) {
+      Alert.alert('Erreur', "Impossible de créer l'événement.");
+    }
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.price}>{lieu.price_detail}</Text>
+
+      {lieu.price_detail &&
+        <Text style={styles.price}>
+          {lieu.price_detail.replace(/<[^>]*>/g, '')}
+        </Text>
+      }
+
       {lieu.cover_url && (
         <Image
           source={{ uri: lieu.cover_url }}
           style={styles.image}
-          resizeMode="contain"
         />
       )}
 
@@ -29,17 +106,63 @@ const LieuDetailScreen: React.FC<Props> = ({ route }) => {
       <Text style={styles.field}>{lieu.address_street}</Text>
       <Text style={styles.field}>{lieu.address_zipcode}</Text>
       <Text style={styles.field}>{lieu.address_city}</Text>
-      <Text style={styles.description}>À propos: </Text>
-      <Text style={styles.desc}>{lieu.description}</Text>
+
+      <Text style={styles.description}>À propos :</Text>
+
+      {lieu.description &&
+        <Text style={styles.desc}>
+          {lieu.description.replace(/<[^>]*>/g, '')}
+        </Text>
+      }
+
+      {/* Sélection date */}
+      <View style={styles.dateContainer}>
+        <Button
+          title={`Choisir la date : ${date.toLocaleDateString()}`}
+          onPress={() => setShowDatePicker(true)}
+        />
+
+        {showDatePicker && (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            onChange={onChangeDate}
+          />
+        )}
+      </View>
+
+      {/* Sélection heure */}
+      <View style={styles.dateContainer}>
+        <Button
+          title={`Choisir l'heure : ${time.toLocaleTimeString()}`}
+          onPress={() => setShowTimePicker(true)}
+        />
+
+        {showTimePicker && (
+          <DateTimePicker
+            value={time}
+            mode="time"
+            onChange={onChangeTime}
+          />
+        )}
+      </View>
+
+      <View style={styles.calendarButton}>
+        <Button
+          title="Ajouter au calendrier"
+          onPress={addEventToCalendar}
+        />
+      </View>
 
     </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f5f5f5'
   },
 
   content: {
@@ -48,61 +171,59 @@ const styles = StyleSheet.create({
 
   image: {
     width: '100%',
-    borderRadius: 10,
     height: 300,
-    alignSelf: 'center',
+    borderRadius: 10,
+    marginBottom: 20,
   },
 
   title: {
     fontSize: 26,
-    fontWeight: "bold",
-    color: "#222",
-    marginBottom: 30,
-    textAlign: "center",
+    fontWeight: 'bold',
+    color: '#222',
+    marginBottom: 20,
+    textAlign: 'center',
   },
 
   field: {
-    fontSize: 13,
-    color: "#555",
-    textAlign: "center",
-    marginBottom: 10,
-  },
-
-  difficulte: {
-    fontSize: 13,
-    color: "#555",
-    textAlign: "center",
-    marginBottom: 35,
+    fontSize: 14,
+    color: '#555',
+    textAlign: 'center',
+    marginBottom: 8,
   },
 
   description: {
-    alignSelf: "center",
-    fontSize: 16,
-    fontWeight: "bold",
-    textDecorationLine: "underline",
-    color: "#222",
-    marginTop: 20,
-    marginBottom: 30,
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 25,
+    marginBottom: 10,
+    textAlign: 'center',
   },
 
   desc: {
-    fontSize: 13,
-    lineHeight: 24,
-    color: "#555",
-    fontStyle: "italic",
-    textAlign: "justify",
+    fontSize: 14,
+    lineHeight: 22,
+    color: '#555',
+    textAlign: 'justify',
+    fontStyle: 'italic',
   },
 
   price: {
     fontSize: 16,
-    color: "#222",
-    fontWeight: "bold",
-    textAlign: "center",
-    backgroundColor: "#e0e0e0",
+    color: '#222',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    backgroundColor: '#e0e0e0',
     padding: 10,
-    width: "auto",
-    borderRadius: 30,
+    borderRadius: 20,
+    marginBottom: 15,
   },
-});
 
-export default LieuDetailScreen;
+  dateContainer: {
+    marginTop: 30,
+  },
+
+  calendarButton: {
+    marginTop: 20,
+  },
+
+});

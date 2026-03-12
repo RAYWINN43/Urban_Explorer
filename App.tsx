@@ -8,6 +8,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import { MapsScreen } from './src/screens/MapsScreen';
 import { ProfilScreen } from './src/screens/ProfilScreen';
 import LieuDetailScreen from './src/screens/LieuDetailScreen';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -38,12 +39,13 @@ function TabNavigator() {
 
 export default function App() {
   return (
+    <SafeAreaView style={{ flex: 1 }}>
     <NavigationContainer>
       <Stack.Navigator>
 
         {/* Tabs */}
         <Stack.Screen
-          name="Tabs"
+          name="Retour"
           component={TabNavigator}
           options={{ headerShown: false }}
         />
@@ -59,5 +61,6 @@ export default function App() {
 
       <StatusBar style="auto" />
     </NavigationContainer>
+    </SafeAreaView>
   );
 }

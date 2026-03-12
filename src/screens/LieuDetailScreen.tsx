@@ -14,7 +14,7 @@ const LieuDetailScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.price}>{lieu.price_detail}</Text>
+      <Text style={styles.price}>{lieu.price_detail.replace(/<[^>]*>/g,'')}</Text>
       {lieu.cover_url && (
         <Image
           source={{ uri: lieu.cover_url }}
@@ -30,7 +30,7 @@ const LieuDetailScreen: React.FC<Props> = ({ route }) => {
       <Text style={styles.field}>{lieu.address_zipcode}</Text>
       <Text style={styles.field}>{lieu.address_city}</Text>
       <Text style={styles.description}>À propos: </Text>
-      <Text style={styles.desc}>{lieu.description}</Text>
+      <Text style={styles.desc}>{lieu.description?.replace(/<[^>]*>/g,'')}</Text>
 
     </ScrollView>
   );

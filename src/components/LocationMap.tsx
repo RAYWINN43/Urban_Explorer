@@ -6,10 +6,11 @@ import { Coordinates, LocationMapProps } from '../types';
 import apiClient from '../services/api';
 import { ApiResponse, Lieu } from '../types';
 
-export const LocationMap: React.FC<LocationMapProps> = ({ onLocationFound }) => {
+export const LocationMap: React.FC<LocationMapProps> = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lieux, setLieux] = useState<Lieu[]>([]);
+  const [userLocation, setUserLocation] = useState<Coordinates>()
 
   useEffect(() => {
     const getCurrentLocation = async () => {
@@ -21,14 +22,12 @@ export const LocationMap: React.FC<LocationMapProps> = ({ onLocationFound }) => 
           setIsLoading(false);
           return;
         }
-
         const currentPosition = await Location.getCurrentPositionAsync({});
         const coords: Coordinates = {
           lat: currentPosition.coords.latitude,
           lon: currentPosition.coords.longitude,
         };
-
-        onLocationFound(coords);
+        setUserLocation(coords);
       } catch (error) {
         setErrorMsg("Impossible de récupérer la position actuelle.");
       } finally {
@@ -37,7 +36,7 @@ export const LocationMap: React.FC<LocationMapProps> = ({ onLocationFound }) => 
     };
 
     getCurrentLocation();
-  }, [onLocationFound]);
+  }, []);
 
   
   const fetchLieux = async () => {
@@ -49,7 +48,7 @@ export const LocationMap: React.FC<LocationMapProps> = ({ onLocationFound }) => 
     } catch (err: any) {
       setErrorMsg(err.message || 'Une erreur est survenue');
     } finally {
-      setIsLoading(false);
+      //setIsLoading(false);
     }
   };
 
@@ -75,12 +74,21 @@ export const LocationMap: React.FC<LocationMapProps> = ({ onLocationFound }) => 
     );
   }
 
+  /*// Si on veut centrer la position sur Paris
   const initialRegion: Region = {
     latitude: 48.8566, 
     longitude: 2.3522,
     latitudeDelta: 0.05,
     longitudeDelta: 0.05,
-  };
+  };//*/
+
+  // Si on veut centrer la position sur l'utilisateur
+  const initialRegion: Region = {
+    latitude: userLocation.lat, 
+    longitude: userLocation.lon,
+    latitudeDelta: 0.05,
+    longitudeDelta: 0.05,
+  };//*/
 
   return (
     <View style={styles.mapContainer}>
@@ -92,7 +100,7 @@ export const LocationMap: React.FC<LocationMapProps> = ({ onLocationFound }) => 
             pinColor="blue"
             key={location.id}
             title={location.title}
-            description={location.description}
+            description={location.description?.replace(/<[^>]*>/g,'')}
             opacity={.7}
             zIndex={1}/>
         )}
@@ -114,9 +122,7 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   mapContainer: {
-    width: '100%',
-    height: 500,
-    overflow: 'hidden',
+    height: '100%'
   },
   map: {
     width: '100%',

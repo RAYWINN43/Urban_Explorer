@@ -92,11 +92,13 @@ export const LocationMap: React.FC<LocationMapProps> = ({ onLocationFound }) => 
             pinColor="blue"
             title={location.title}
             description={location.description}
-            opacity={.7}/>
+            opacity={.7}
+            zIndex={1}/>
         )}
         <Marker coordinate={initialRegion}
         pinColor="red"
-        isPreselected={true} />
+        isPreselected={true}
+        zIndex={10} />
       </MapView>
     </View>
   );
@@ -113,8 +115,6 @@ const styles = StyleSheet.create({
   mapContainer: {
     width: '100%',
     height: 500,
-    marginVertical: 16,
-    borderRadius: 12,
     overflow: 'hidden',
   },
   map: {

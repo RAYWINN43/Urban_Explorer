@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import * as Location from 'expo-location';
-import MapView, { Marker, Region } from 'react-native-maps';
+import MapView, { Callout, Marker, Region } from 'react-native-maps';
+import Modal from 'react-native-modal';
 import { Coordinates, LocationMapProps } from '../types';
 import apiClient from '../services/api';
 import { ApiResponse, Lieu } from '../types';
@@ -11,6 +12,8 @@ export const LocationMap: React.FC<LocationMapProps> = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [lieux, setLieux] = useState<Lieu[]>([]);
   const [userLocation, setUserLocation] = useState<Coordinates>()
+  const [selectedMarker, setSelectedMarker] = useState<Lieu | null>()
+  const [lastPressedMarker, setLastPressedMarker] = useState<string>('');
 
   useEffect(() => {
     const getCurrentLocation = async () => {
@@ -102,13 +105,36 @@ export const LocationMap: React.FC<LocationMapProps> = () => {
             title={location.title}
             description={location.description?.replace(/<[^>]*>/g,'')}
             opacity={.7}
-            zIndex={1}/>
+            zIndex={1}
+            onPress={() => {
+              lastPressedMarker!=location.id? setLastPressedMarker(location.id) :
+              setSelectedMarker(location)}}/>
         )}
+        <Marker coordinate={{ latitude: 48.9566, longitude: 2.3522 }}>
+          
+        </Marker>
         <Marker coordinate={initialRegion}
         pinColor="red"
         isPreselected={true}
         zIndex={10} />
       </MapView>
+
+      <Modal
+        isVisible={!!selectedMarker}
+        onBackdropPress={() => setSelectedMarker(null)}
+        style={styles.modal}
+      >
+        <ScrollView style={styles.callout}>
+          <Text style={styles.title}>{selectedMarker?.title}</Text>
+          <Text>{selectedMarker?.description?.replace(/<[^>]*>/g,'')}</Text>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setSelectedMarker(null)}
+          >
+            <Text>Fermer</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </Modal>
     </View>
   );
 };
@@ -127,6 +153,27 @@ const styles = StyleSheet.create({
   map: {
     width: '100%',
     height: '100%',
+  },
+  modal: {
+    margin: 0,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  callout: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 10,
+    width: '80%',
+    marginTop: 50,
+    marginBottom:50
+  },
+  title: {
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  closeButton: {
+    marginTop: 10,
+    alignSelf: 'flex-end',
   },
   infoText: {
     marginTop: 10,

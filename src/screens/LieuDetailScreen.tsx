@@ -29,6 +29,7 @@ export default function LieuDetailScreen({ route }: Props) {
 
   const onChangeDate = (event: any, date?: Date) => {
 
+    // Android ferme automatiquement le picker
     if (Platform.OS === 'android') {
       setShowPicker(false);
     }
@@ -74,14 +75,14 @@ export default function LieuDetailScreen({ route }: Props) {
         title: lieu.title ?? 'Événement',
         startDate,
         endDate,
-        notes: lieu.description ?? '',
+        notes: lieu.description?.replace(/<[^>]*>/g, '') ?? '',
         location: `${lieu.address_name ?? ''} ${lieu.address_city ?? ''}`
       });
 
-      Alert.alert('Succès', 'Événement ajouté au calendrier');
+      Alert.alert('Succès', 'Événement ajouté au calendrier.');
 
     } catch (error) {
-      Alert.alert('Erreur', "Impossible de créer l'événement");
+      Alert.alert('Erreur', "Impossible de créer l'événement.");
     }
   };
 
@@ -89,7 +90,9 @@ export default function LieuDetailScreen({ route }: Props) {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
 
       {lieu.price_detail && (
-        <Text style={styles.price}>{lieu.price_detail}</Text>
+        <Text style={styles.price}>
+          {lieu.price_detail.replace(/<[^>]*>/g, '')}
+        </Text>
       )}
 
       {lieu.cover_url && (
@@ -107,14 +110,17 @@ export default function LieuDetailScreen({ route }: Props) {
       <Text style={styles.field}>{lieu.address_zipcode}</Text>
       <Text style={styles.field}>{lieu.address_city}</Text>
 
-      <Text style={styles.description}>À propos</Text>
-      <Text style={styles.desc}>{lieu.description}</Text>
+      <Text style={styles.description}>À propos :</Text>
 
-      {/* Sélecteur date */}
+      {lieu.description && (
+        <Text style={styles.desc}>
+          {lieu.description.replace(/<[^>]*>/g, '')}
+        </Text>
+      )}
+
       <View style={styles.dateContainer}>
-
         <Button
-          title={`Choisir date : ${selectedDate.toLocaleString()}`}
+          title={`Choisir une date : ${selectedDate.toLocaleString()}`}
           onPress={() => setShowPicker(true)}
         />
 
@@ -126,10 +132,8 @@ export default function LieuDetailScreen({ route }: Props) {
             onChange={onChangeDate}
           />
         )}
-
       </View>
 
-      {/* Bouton calendrier */}
       <View style={styles.calendarButton}>
         <Button
           title="Ajouter au calendrier"
@@ -145,33 +149,34 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5'
+    backgroundColor: '#f5f5f5',
+    marginBottom: 50
   },
 
   content: {
-    padding: 20
+    padding: 20,
   },
 
   image: {
     width: '100%',
     height: 300,
     borderRadius: 10,
-    marginBottom: 20
+    marginBottom: 20,
   },
 
   title: {
     fontSize: 26,
     fontWeight: 'bold',
     color: '#222',
+    marginBottom: 20,
     textAlign: 'center',
-    marginBottom: 20
   },
 
   field: {
     fontSize: 14,
     color: '#555',
     textAlign: 'center',
-    marginBottom: 8
+    marginBottom: 8,
   },
 
   description: {
@@ -179,14 +184,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 25,
     marginBottom: 10,
-    textAlign: 'center'
+    textAlign: 'center',
   },
 
   desc: {
     fontSize: 14,
     lineHeight: 22,
     color: '#555',
-    textAlign: 'justify'
+    textAlign: 'justify',
   },
 
   price: {
@@ -197,15 +202,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0e0e0',
     padding: 10,
     borderRadius: 20,
-    marginBottom: 15
+    marginBottom: 15,
   },
 
   dateContainer: {
-    marginTop: 30
+    marginTop: 30,
   },
 
   calendarButton: {
-    marginTop: 20
-  }
+    marginTop: 20,
+  },
 
 });

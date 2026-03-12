@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Lieu } from '../types/api.types';
-import {CharacterLocationRef} from '../types/api.types';
+import {Lieu} from '../types/index';
+
 
 interface LieuCardProps {
   lieu: Lieu;
@@ -26,20 +26,20 @@ const LieuCard = ({ lieu, onPress }: LieuCardProps) => {
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
-      <Image source={{ uri: lieu.image }} style={styles.Image} />
+      <Image source={{ uri: lieu.cover_url }} style={styles.Image} />
 
       <View style={styles.textContainer}>
         <View style={styles.titleRow}>
-          <Text style={styles.title} numberOfLines={2}>{lieu.name}</Text>
-          
+          <Text style={styles.title} numberOfLines={2}>{lieu.title}</Text>
+
 
           <TouchableOpacity onPress={toggleFavorite} style={styles.favoriteBtn}>
             <Text style={{ fontSize: 18 }}>{isFavorite ? '❤️' : '🤍'}</Text>
           </TouchableOpacity>
         </View>
-        <Text style={{ fontSize: 14, color: '#555' }}>{lieu.species}</Text>
-        <Text style={{ fontSize: 14, color: '#555' }}>{lieu.gender}</Text>
-        <Text style={{ fontSize: 14, color: '#555' }}>{lieu.location.name}</Text>
+        <Text style={{ fontSize: 14, color: '#555' }}>{lieu.addressName}</Text>
+        <Text style={{ fontSize: 14, color: '#555' }}>{lieu.addressStreet}</Text>
+        <Text style={{ fontSize: 14, color: '#555' }}>{lieu.addressZipcode}</Text>
       </View>
     </TouchableOpacity>
   );

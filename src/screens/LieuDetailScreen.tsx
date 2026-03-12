@@ -6,8 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   Alert,
-  Button,
-  Platform
+  Button
 } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -59,10 +58,7 @@ export default function LieuDetailScreen({ route }: Props) {
       );
 
       if (!writableCalendar) {
-        Alert.alert(
-          'Erreur',
-          'Aucun calendrier disponible pour écrire un événement.'
-        );
+        Alert.alert('Erreur', 'Aucun calendrier disponible pour écrire un événement.');
         return;
       }
 
@@ -81,7 +77,7 @@ export default function LieuDetailScreen({ route }: Props) {
         location: `${lieu.address_name ?? ''} ${lieu.address_city ?? ''}`
       });
 
-      Alert.alert('Succès', 'Événement ajouté au calendrier');
+      Alert.alert('Succès', 'Événement ajouté au calendrier.');
 
     } catch (error) {
       Alert.alert('Erreur', "Impossible de créer l'événement.");
@@ -90,6 +86,12 @@ export default function LieuDetailScreen({ route }: Props) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+
+      {lieu.price_detail &&
+        <Text style={styles.price}>
+          {lieu.price_detail.replace(/<[^>]*>/g, '')}
+        </Text>
+      }
 
       {lieu.cover_url && (
         <Image
@@ -105,7 +107,16 @@ export default function LieuDetailScreen({ route }: Props) {
       <Text style={styles.field}>{lieu.address_zipcode}</Text>
       <Text style={styles.field}>{lieu.address_city}</Text>
 
-      <View style={{ marginTop: 30 }}>
+      <Text style={styles.description}>À propos :</Text>
+
+      {lieu.description &&
+        <Text style={styles.desc}>
+          {lieu.description.replace(/<[^>]*>/g, '')}
+        </Text>
+      }
+
+      {/* Sélection date */}
+      <View style={styles.dateContainer}>
         <Button
           title={`Choisir la date : ${date.toLocaleDateString()}`}
           onPress={() => setShowDatePicker(true)}
@@ -120,7 +131,8 @@ export default function LieuDetailScreen({ route }: Props) {
         )}
       </View>
 
-      <View style={{ marginTop: 20 }}>
+      {/* Sélection heure */}
+      <View style={styles.dateContainer}>
         <Button
           title={`Choisir l'heure : ${time.toLocaleTimeString()}`}
           onPress={() => setShowTimePicker(true)}
@@ -135,7 +147,7 @@ export default function LieuDetailScreen({ route }: Props) {
         )}
       </View>
 
-      <View style={{ marginTop: 20 }}>
+      <View style={styles.calendarButton}>
         <Button
           title="Ajouter au calendrier"
           onPress={addEventToCalendar}
@@ -150,31 +162,68 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5'
+    backgroundColor: '#f5f5f5',
+    marginBottom: 50
   },
 
   content: {
-    padding: 20
+    padding: 20,
   },
 
   image: {
     width: '100%',
     height: 300,
     borderRadius: 10,
-    marginBottom: 20
+    marginBottom: 20,
   },
 
   title: {
     fontSize: 26,
     fontWeight: 'bold',
+    color: '#222',
+    marginBottom: 20,
     textAlign: 'center',
-    marginBottom: 20
   },
 
   field: {
     fontSize: 14,
+    color: '#555',
     textAlign: 'center',
-    marginBottom: 6
-  }
+    marginBottom: 8,
+  },
+
+  description: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 25,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+
+  desc: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: '#555',
+    textAlign: 'justify',
+  },
+
+  price: {
+    fontSize: 16,
+    color: '#222',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    backgroundColor: '#e0e0e0',
+    padding: 10,
+    borderRadius: 20,
+    marginBottom: 15,
+  },
+
+  dateContainer: {
+    marginTop: 30,
+  },
+
+  calendarButton: {
+    marginTop: 20,
+  },
 
 });

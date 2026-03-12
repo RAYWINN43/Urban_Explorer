@@ -44,7 +44,8 @@
         {
           "calendarPermission": "Requis pour planifier le suivi."
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ]
   }
 }

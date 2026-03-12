@@ -10,64 +10,42 @@ import {
 } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
 import apiClient from '../services/api';
-import { ApiResponse, Lieu } from '../types/index';
+import { Lieu } from '../types';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
 import LieuCard from '../components/LieuCard';
 import { RootStackParamList } from '../types/navigation';
 
-export default function LieuListScreen() {
+export default function HomeScreen() {
   const [lieux, setLieux] = useState<Lieu[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  const [page, setPage] = useState(1);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
 
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'LieuList'>>();
 
-  const filteredLieux = lieux.filter((lieu) =>
-    lieu.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    const fetchLieux = async () => {
+      try {
+        const response = await apiClient.get('');
 
-  const fetchLieux = async (pageNumber: number) => {
-    try {
-      const response = await apiClient.get<ApiResponse<Lieu>>(
-        `/lieu?page=${pageNumber}`
-      );
+        console.log('Données API :', response.data);
 
-      const newLieux = response.data.results;
-
-      setLieux((prev) =>
-        pageNumber === 1 ? newLieux : [...prev, ...newLieux]
-      );
-
-      if (response.data.info.next === null) {
-        setHasMore(false);
+        setLieux(response.data.results);
+      } catch (err: any) {
+        setError(err.message || 'Erreur lors du chargement');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue');
-    } finally {
-      setIsLoading(false);
-      setIsFetchingMore(false);
-    }
-  };
+    };
 
-  useEffect(() => {
-    fetchLieux(1);
+    fetchLieux();
   }, []);
-
-  useEffect(() => {
-    if (page > 1) {
-      fetchLieux(page);
-    }
-  }, [page]);
 
   useEffect(() => {
     if (searchTimeoutRef.current) {
@@ -85,28 +63,24 @@ export default function LieuListScreen() {
     };
   }, [searchQuery]);
 
-  const handleLoadMore = () => {
-    if (!isLoading && !isFetchingMore && hasMore) {
-      setIsFetchingMore(true);
-      setPage((prev) => prev + 1);
-    }
-  };
+  const filteredLieux = lieux.filter((lieu) =>
+    lieu.title?.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+    lieu.address_name?.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
+  );
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
+      <View style={styles.center}>
         <ActivityIndicator size="large" />
-        <Text style={styles.loadingText}>Chargement...</Text>
-        <StatusBar style="auto" />
+        <Text>Chargement...</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Erreur : {error}</Text>
-        <StatusBar style="auto" />
+      <View style={styles.center}>
+        <Text style={{ color: 'red' }}>Erreur : {error}</Text>
       </View>
     );
   }
@@ -116,15 +90,14 @@ export default function LieuListScreen() {
       <FlatList
         data={filteredLieux}
         keyExtractor={(item) => item.id.toString()}
+        keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
-          <View>
-            <TextInput
-              placeholder="Rechercher un lieu..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              style={styles.searchInput}
-            />
-          </View>
+          <TextInput
+            placeholder="Rechercher un lieu..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            style={styles.searchInput}
+          />
         }
         renderItem={({ item }) => (
           <LieuCard
@@ -132,15 +105,9 @@ export default function LieuListScreen() {
             onPress={() => navigation.navigate('LieuDetail', { lieu: item })}
           />
         )}
-        contentContainerStyle={{ padding: 5 }}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          isFetchingMore ? (
-            <ActivityIndicator size="small" style={styles.footerLoader} />
-          ) : null
-        }
       />
+
+      <StatusBar style="auto" />
     </SafeAreaView>
   );
 }
@@ -149,51 +116,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: 50,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  loadingText: {
-    marginTop: 10,
-    textAlign: 'center',
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  card: {
-    flexDirection: 'row',
+
+  center: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: 12,
-    marginBottom: 12,
-    backgroundColor: '#f2f2f2',
-    borderRadius: 10,
   },
-  image: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    marginRight: 12,
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
+
   searchInput: {
     height: 40,
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginBottom: 10,
-  },
-  footerLoader: {
-    marginVertical: 20,
+    marginVertical: 10,
   },
 });

@@ -37,9 +37,9 @@ const LieuCard = ({ lieu, onPress }: LieuCardProps) => {
             <Text style={{ fontSize: 18 }}>{isFavorite ? '❤️' : '🤍'}</Text>
           </TouchableOpacity>
         </View>
-        <Text style={{ fontSize: 14, color: '#555' }}>{lieu.addressName}</Text>
-        <Text style={{ fontSize: 14, color: '#555' }}>{lieu.addressStreet}</Text>
-        <Text style={{ fontSize: 14, color: '#555' }}>{lieu.addressZipcode}</Text>
+        <Text style={{ fontSize: 14, color: '#555' }}>{lieu.address_name}</Text>
+        <Text style={{ fontSize: 14, color: '#555' }}>{lieu.address_street}</Text>
+        <Text style={{ fontSize: 14, color: '#555' }}>{lieu.address_zipcode}</Text>
       </View>
     </TouchableOpacity>
   );

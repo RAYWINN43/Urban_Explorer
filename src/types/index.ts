@@ -18,12 +18,12 @@ export interface LocationMapProps {
 export interface Lieu {
     id?: string;
     title: string | null;
-    location: Coordinates | null;
+    lat_lon: Coordinates | null;
     description: string | null;
     cover_url: string | null;
-    addressName: string | null;
-    addressStreet: string | null;
-    addressZipcode: string | null;
-    addressCity: string | null;
-    price: number | null;
+    address_name: string | null;
+    address_street: string | null;
+    address_zipcode: string | null;
+    address_city: string | null;
+    price_detail: number | null;
 }

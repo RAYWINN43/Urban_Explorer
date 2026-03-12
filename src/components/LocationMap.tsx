@@ -3,10 +3,13 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import * as Location from 'expo-location';
 import MapView, { Marker, Region } from 'react-native-maps';
 import { Coordinates, LocationMapProps } from '../types';
+import apiClient from '../services/api';
+import { ApiResponse, Lieu } from '../types';
 
 export const LocationMap: React.FC<LocationMapProps> = ({ onLocationFound }) => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [lieux, setLieux] = useState<Lieu[]>([]);
 
   useEffect(() => {
     const getCurrentLocation = async () => {
@@ -21,8 +24,8 @@ export const LocationMap: React.FC<LocationMapProps> = ({ onLocationFound }) => 
 
         const currentPosition = await Location.getCurrentPositionAsync({});
         const coords: Coordinates = {
-          latitude: currentPosition.coords.latitude,
-          longitude: currentPosition.coords.longitude,
+          lat: currentPosition.coords.latitude,
+          lon: currentPosition.coords.longitude,
         };
 
         onLocationFound(coords);
@@ -35,6 +38,25 @@ export const LocationMap: React.FC<LocationMapProps> = ({ onLocationFound }) => 
 
     getCurrentLocation();
   }, [onLocationFound]);
+
+  
+  const fetchLieux = async () => {
+    try {
+      const response = await apiClient.get<ApiResponse<Lieu>>(
+        ``
+      );
+      setLieux(response.data.results)
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Une erreur est survenue');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLieux();
+  }, []);
+  
 
   if (isLoading) {
     return (
@@ -63,7 +85,20 @@ export const LocationMap: React.FC<LocationMapProps> = ({ onLocationFound }) => 
   return (
     <View style={styles.mapContainer}>
       <MapView style={styles.map} initialRegion={initialRegion}>
-        <Marker coordinate={initialRegion} pinColor="red" />
+        {lieux.map((location) => 
+          <Marker coordinate={{
+            latitude:location.lat_lon.lat,
+            longitude:location.lat_lon.lon, }}
+            pinColor="blue"
+            title={location.title}
+            description={location.description}
+            opacity={.7}
+            zIndex={1}/>
+        )}
+        <Marker coordinate={initialRegion}
+        pinColor="red"
+        isPreselected={true}
+        zIndex={10} />
       </MapView>
     </View>
   );
@@ -79,9 +114,7 @@ const styles = StyleSheet.create({
   },
   mapContainer: {
     width: '100%',
-    height: 250,
-    marginVertical: 16,
-    borderRadius: 12,
+    height: 500,
     overflow: 'hidden',
   },
   map: {

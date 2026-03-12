@@ -90,6 +90,7 @@ export const LocationMap: React.FC<LocationMapProps> = ({ onLocationFound }) => 
             latitude:location.lat_lon.lat,
             longitude:location.lat_lon.lon, }}
             pinColor="blue"
+            key={location.id}
             title={location.title}
             description={location.description}
             opacity={.7}

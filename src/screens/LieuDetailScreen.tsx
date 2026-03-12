@@ -14,7 +14,7 @@ const LieuDetailScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.price}>{lieu.price_detail.replace(/<[^>]*>/g,'')}</Text>
+      {lieu.price_detail? <Text style={styles.price}>{lieu.price_detail?.replace(/<[^>]*>/g,'')}</Text> : <></>}
       {lieu.cover_url && (
         <Image
           source={{ uri: lieu.cover_url }}
@@ -40,6 +40,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+    marginBottom: 50
   },
 
   content: {

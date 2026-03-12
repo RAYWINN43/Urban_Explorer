@@ -8,7 +8,7 @@ interface CameraCaptureProps {
 
 export const CameraCapture: React.FC<CameraCaptureProps> = ({ onPictureTaken }) => {
   const [permission, requestPermission] = useCameraPermissions();
-  const cameraRef = useRef<any>(null);
+  const cameraRef = useRef<CameraView>(null);
 
   if (!permission) {
     return <View />;
@@ -31,6 +31,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onPictureTaken }) 
     try {
       const photo = await cameraRef.current.takePictureAsync({
         quality: 0.5,
+        shutterSound: false,
       });
 
       if (photo?.uri) {

@@ -1,0 +1,31 @@
+import { Alert } from 'react-native';
+import { Incident, ApiResponse } from '../types';
+import axios, { AxiosError } from 'axios';
+
+const apiClient = axios.create({
+  baseURL: 'https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/lieux-culturels-a-paris/records?limit=30',
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+
+export const submitIncident = async (data: Incident): Promise<ApiResponse<Incident>> => {
+  try {
+    const response = await apiClient.post('/posts', data);
+    if (response.status === 201) {
+      console.log('succès');
+      console.log('Données envoyées :', data);
+      return {
+        success: true,
+        data: response.data,
+      };
+    }
+  } catch (error: any) {
+    Alert.alert('Erreur', error.message || 'Une erreur est survenue lors de la soumission de l\'incident.');
+    return {
+      success: false,
+    };
+  }
+};

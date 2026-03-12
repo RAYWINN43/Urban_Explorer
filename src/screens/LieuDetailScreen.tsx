@@ -205,6 +205,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: '#555',
     textAlign: 'justify',
+    fontStyle: 'italic',
   },
 
   price: {

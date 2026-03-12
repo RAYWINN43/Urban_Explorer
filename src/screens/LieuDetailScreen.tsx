@@ -82,11 +82,7 @@ export default function LieuDetailScreen({ route }: Props) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-
-      {lieu.price_detail && (
-        <Text style={styles.price}>{lieu.price_detail}</Text>
-      )}
-
+      <Text style={styles.price}>{lieu.price_detail.replace(/<[^>]*>/g,'')}</Text>
       {lieu.cover_url && (
         <Image
           source={{ uri: lieu.cover_url }}
@@ -101,9 +97,8 @@ export default function LieuDetailScreen({ route }: Props) {
       <Text style={styles.field}>{lieu.address_street}</Text>
       <Text style={styles.field}>{lieu.address_zipcode}</Text>
       <Text style={styles.field}>{lieu.address_city}</Text>
-
-      <Text style={styles.description}>À propos</Text>
-      <Text style={styles.desc}>{lieu.description}</Text>
+      <Text style={styles.description}>À propos: </Text>
+      <Text style={styles.desc}>{lieu.description?.replace(/<[^>]*>/g,'')}</Text>
 
       <View style={styles.dateContainer}>
         <Button

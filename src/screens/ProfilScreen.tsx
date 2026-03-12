@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CameraCapture } from '../components/CameraCapture';
+import { Camera } from 'expo-camera';
 
 const PHOTO_KEY = 'profile_photo_uri';
 
@@ -25,6 +26,20 @@ export const ProfilScreen: React.FC = () => {
     } catch (error) {
       console.log('Erreur chargement photo :', error);
     }
+  };
+
+  const handleOpenCamera = async () => {
+    const { status } = await Camera.requestCameraPermissionsAsync();
+
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permission refusée',
+        "Vous devez autoriser l'accès à la caméra."
+      );
+      return;
+    }
+
+    setShowCamera(true);
   };
 
   const handleSubmit = async () => {
@@ -66,7 +81,7 @@ export const ProfilScreen: React.FC = () => {
       {!showCamera ? (
         <TouchableOpacity
           style={styles.profileContainer}
-          onPress={() => setShowCamera(true)}
+          onPress={handleOpenCamera}
         >
           {photoUri ? (
             <Image source={{ uri: photoUri }} style={styles.profileImage} />
@@ -97,7 +112,7 @@ export const ProfilScreen: React.FC = () => {
 
           <TouchableOpacity
             style={styles.retryButton}
-            onPress={() => setShowCamera(true)}
+            onPress={handleOpenCamera}
           >
             <Text style={styles.retryText}>Reprendre la photo</Text>
           </TouchableOpacity>

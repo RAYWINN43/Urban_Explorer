@@ -24,19 +24,20 @@ export default function LieuDetailScreen({ route }: Props) {
 
   const { lieu } = route.params;
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showPicker, setShowPicker] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [time, setTime] = useState(new Date());
 
-  const onChangeDate = (event: any, date?: Date) => {
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
-    // Android ferme automatiquement le picker
-    if (Platform.OS === 'android') {
-      setShowPicker(false);
-    }
+  const onChangeDate = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) setDate(selectedDate);
+  };
 
-    if (event.type === 'set' && date) {
-      setSelectedDate(date);
-    }
+  const onChangeTime = (event: any, selectedTime?: Date) => {
+    setShowTimePicker(false);
+    if (selectedTime) setTime(selectedTime);
   };
 
   const addEventToCalendar = async () => {
@@ -45,10 +46,7 @@ export default function LieuDetailScreen({ route }: Props) {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
 
       if (status !== 'granted') {
-        Alert.alert(
-          'Permission refusée',
-          "Impossible d'accéder au calendrier."
-        );
+        Alert.alert('Permission refusée', "Impossible d'accéder au calendrier.");
         return;
       }
 
@@ -68,7 +66,11 @@ export default function LieuDetailScreen({ route }: Props) {
         return;
       }
 
-      const startDate = selectedDate;
+      // fusion date + heure
+      const startDate = new Date(date);
+      startDate.setHours(time.getHours());
+      startDate.setMinutes(time.getMinutes());
+
       const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
 
       await Calendar.createEventAsync(writableCalendar.id, {
@@ -79,7 +81,7 @@ export default function LieuDetailScreen({ route }: Props) {
         location: `${lieu.address_name ?? ''} ${lieu.address_city ?? ''}`
       });
 
-      Alert.alert('Succès', 'Événement ajouté au calendrier.');
+      Alert.alert('Succès', 'Événement ajouté au calendrier');
 
     } catch (error) {
       Alert.alert('Erreur', "Impossible de créer l'événement.");
@@ -89,17 +91,10 @@ export default function LieuDetailScreen({ route }: Props) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
 
-      {lieu.price_detail && (
-        <Text style={styles.price}>
-          {lieu.price_detail.replace(/<[^>]*>/g, '')}
-        </Text>
-      )}
-
       {lieu.cover_url && (
         <Image
           source={{ uri: lieu.cover_url }}
           style={styles.image}
-          resizeMode="cover"
         />
       )}
 
@@ -110,31 +105,37 @@ export default function LieuDetailScreen({ route }: Props) {
       <Text style={styles.field}>{lieu.address_zipcode}</Text>
       <Text style={styles.field}>{lieu.address_city}</Text>
 
-      <Text style={styles.description}>À propos :</Text>
-
-      {lieu.description && (
-        <Text style={styles.desc}>
-          {lieu.description.replace(/<[^>]*>/g, '')}
-        </Text>
-      )}
-
-      <View style={styles.dateContainer}>
+      <View style={{ marginTop: 30 }}>
         <Button
-          title={`Choisir une date : ${selectedDate.toLocaleString()}`}
-          onPress={() => setShowPicker(true)}
+          title={`Choisir la date : ${date.toLocaleDateString()}`}
+          onPress={() => setShowDatePicker(true)}
         />
 
-        {showPicker && (
+        {showDatePicker && (
           <DateTimePicker
-            value={selectedDate}
-            mode="datetime"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            value={date}
+            mode="date"
             onChange={onChangeDate}
           />
         )}
       </View>
 
-      <View style={styles.calendarButton}>
+      <View style={{ marginTop: 20 }}>
+        <Button
+          title={`Choisir l'heure : ${time.toLocaleTimeString()}`}
+          onPress={() => setShowTimePicker(true)}
+        />
+
+        {showTimePicker && (
+          <DateTimePicker
+            value={time}
+            mode="time"
+            onChange={onChangeTime}
+          />
+        )}
+      </View>
+
+      <View style={{ marginTop: 20 }}>
         <Button
           title="Ajouter au calendrier"
           onPress={addEventToCalendar}
@@ -149,68 +150,31 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-    marginBottom: 50
+    backgroundColor: '#f5f5f5'
   },
 
   content: {
-    padding: 20,
+    padding: 20
   },
 
   image: {
     width: '100%',
     height: 300,
     borderRadius: 10,
-    marginBottom: 20,
+    marginBottom: 20
   },
 
   title: {
     fontSize: 26,
     fontWeight: 'bold',
-    color: '#222',
-    marginBottom: 20,
     textAlign: 'center',
+    marginBottom: 20
   },
 
   field: {
     fontSize: 14,
-    color: '#555',
     textAlign: 'center',
-    marginBottom: 8,
-  },
-
-  description: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 25,
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-
-  desc: {
-    fontSize: 14,
-    lineHeight: 22,
-    color: '#555',
-    textAlign: 'justify',
-  },
-
-  price: {
-    fontSize: 16,
-    color: '#222',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    backgroundColor: '#e0e0e0',
-    padding: 10,
-    borderRadius: 20,
-    marginBottom: 15,
-  },
-
-  dateContainer: {
-    marginTop: 30,
-  },
-
-  calendarButton: {
-    marginTop: 20,
-  },
+    marginBottom: 6
+  }
 
 });

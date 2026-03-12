@@ -13,11 +13,8 @@ import {
   Vibration,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as Calendar from 'expo-calendar';
-import { CameraCapture } from '../components/CameraCapture';
-import { LocationMap } from '../components/LocationMap';
-import { Coordinates, Incident  } from '../types';
-import { submitIncident } from '../services/api';
+import { LieuCard } from '../components/LieuCard';
+import { getLieu } from '../services/api';
 
 export const HomeScreen: React.FC = () => {
   const [photoUri, setPhotoUri] = useState<string | null>(null);

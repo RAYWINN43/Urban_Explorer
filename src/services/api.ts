@@ -1,5 +1,5 @@
 import { Alert } from 'react-native';
-import { Incident, ApiResponse } from '../types';
+import { Lieu, ApiResponse } from '../types';
 import axios, { AxiosError } from 'axios';
 
 const apiClient = axios.create({
@@ -11,9 +11,9 @@ const apiClient = axios.create({
 });
 
 
-export const submitIncident = async (data: Incident): Promise<ApiResponse<Incident>> => {
+export const getLieu = async (data: Lieu): Promise<ApiResponse<Lieu>> => {
   try {
-    const response = await apiClient.post('/posts', data);
+    const response = await apiClient.post('/get', data);
     if (response.status === 201) {
       console.log('succès');
       console.log('Données envoyées :', data);

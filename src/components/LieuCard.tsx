@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import {Character} from '../types/api.types';
+import { Lieu } from '../types/api.types';
 import {CharacterLocationRef} from '../types/api.types';
 
-interface RickCardProps {
-  character: Character;
+interface LieuCardProps {
+  lieu: Lieu;
   onPress?: () => void;
 }
 
-const RickCard = ({ character, onPress }: RickCardProps) => {
+const LieuCard = ({ lieu, onPress }: LieuCardProps) => {
   const [isFavorite, setIsFavorite] = useState(false);
 
   const toggleFavorite = () => {
@@ -18,7 +18,7 @@ const RickCard = ({ character, onPress }: RickCardProps) => {
     if (newStatus) {
       Alert.alert(
         'Succès',
-        `${character.name} a été ajouté aux favoris`,
+        `${lieu.title} a été ajouté aux favoris`,
         [{ text: 'OK', style: 'default' }]
       );
     }
@@ -26,20 +26,20 @@ const RickCard = ({ character, onPress }: RickCardProps) => {
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
-      <Image source={{ uri: character.image }} style={styles.Image} />
+      <Image source={{ uri: lieu.image }} style={styles.Image} />
 
       <View style={styles.textContainer}>
         <View style={styles.titleRow}>
-          <Text style={styles.title} numberOfLines={2}>{character.name}</Text>
+          <Text style={styles.title} numberOfLines={2}>{lieu.name}</Text>
           
 
           <TouchableOpacity onPress={toggleFavorite} style={styles.favoriteBtn}>
             <Text style={{ fontSize: 18 }}>{isFavorite ? '❤️' : '🤍'}</Text>
           </TouchableOpacity>
         </View>
-        <Text style={{ fontSize: 14, color: '#555' }}>{character.species}</Text>
-        <Text style={{ fontSize: 14, color: '#555' }}>{character.gender}</Text>
-        <Text style={{ fontSize: 14, color: '#555' }}>{character.location.name}</Text>
+        <Text style={{ fontSize: 14, color: '#555' }}>{lieu.species}</Text>
+        <Text style={{ fontSize: 14, color: '#555' }}>{lieu.gender}</Text>
+        <Text style={{ fontSize: 14, color: '#555' }}>{lieu.location.name}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -91,4 +91,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RickCard;
+export default LieuCard;

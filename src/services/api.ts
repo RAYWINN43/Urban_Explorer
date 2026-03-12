@@ -1,5 +1,3 @@
-import { Alert } from 'react-native';
-import { Lieu, ApiResponse } from '../types';
 import axios, { AxiosError } from 'axios';
 
 const apiClient = axios.create({
@@ -10,22 +8,28 @@ const apiClient = axios.create({
   },
 });
 
-
-export const getLieu = async (data: Lieu): Promise<ApiResponse<Lieu>> => {
-  try {
-    const response = await apiClient.post('/get', data);
-    if (response.status === 201) {
-      console.log('succès');
-      console.log('Données envoyées :', data);
-      return {
-        success: true,
-        data: response.data,
-      };
-    }
-  } catch (error: any) {
-    Alert.alert('Erreur', error.message || 'Une erreur est survenue lors de la soumission de l\'incident.');
-    return {
-      success: false,
-    };
+apiClient.interceptors.request.use(
+  (config) => {
+    console.log(
+      `Requête envoyée : ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`
+    );
+    return config;
+  },
+  (error: AxiosError) => {
+    console.log('Erreur avant envoi de la requête :', error.name);
+    return Promise.reject(error);
   }
-};
+);
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error: AxiosError) => {
+    console.log('Message :', error.message);
+    console.log('Status HTTP :', error.response?.status);
+    console.log('URL appelée :', error.config?.url);
+
+    return Promise.reject(error);
+  }
+);
+
+export default apiClient;

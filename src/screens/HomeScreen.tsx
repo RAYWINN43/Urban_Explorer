@@ -1,181 +1,199 @@
-import React, { useState } from 'react';
+import { StatusBar } from 'expo-status-bar';
 import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  TextInput,
-  Alert,
   ActivityIndicator,
-  Button,
-  Vibration,
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { LieuCard } from '../components/LieuCard';
-import { getLieu } from '../services/api';
+import { useEffect, useRef, useState } from 'react';
+import apiClient from '../services/api';
+import { ApiResponse, Lieu } from '../types/index';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-export const HomeScreen: React.FC = () => {
-  const [photoUri, setPhotoUri] = useState<string | null>(null);
-  const [location, setLocation] = useState<Coordinates | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+import LieuCard from '../components/LieuCard';
+import { RootStackParamList } from '../types/navigation';
 
-  const addEventToCalendar = async () => {
-    const { status } = await Calendar.requestCalendarPermissionsAsync();
+export default function LieuListScreen() {
+  const [lieux, setLieux] = useState<Lieu[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
-    if (status !== 'granted') {
-      Alert.alert('Permission refusée', "Impossible d'accéder au calendrier.");
-      return;
-    }
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList, 'LieuList'>>();
 
-    const writableCalendar = calendars.find((calendar) => calendar.allowsModifications);
+  const filteredLieux = lieux.filter((lieu) =>
+    lieu.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
+  );
 
-    if (!writableCalendar) {
-      Alert.alert('Erreur', 'Aucun calendrier disponible pour écrire un événement.');
-      return;
-    }
-
-    const startDate = new Date();
-    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
-
-    await Calendar.createEventAsync(writableCalendar.id, {
-      title: 'Suivi intervention',
-      startDate,
-      endDate,
-      location: location ? `${location.latitude}, ${location.longitude}` : undefined,
-    });
-  };
-
-  const handleSubmit = async () => {
-    if (!photoUri || !location) {
-      Alert.alert(
-        'Erreur',
-        'Vous devez prendre une photo et récupérer la localisation avant de sauvegarder.'
-      );
-      return;
-    }
-
-    const entry: Incident = {
-      photoUri,
-      location,
-      timestamp: Date.now(),
-    };
-
+  const fetchLieux = async (pageNumber: number) => {
     try {
-      setIsSubmitting(true);
+      const response = await apiClient.get<ApiResponse<Lieu>>(
+        `/lieu?page=${pageNumber}`
+      );
 
-      const response = await submitIncident(entry);
+      const newLieux = response.data.results;
 
-      if (response.success) {
-        Vibration.vibrate(300);
-        await addEventToCalendar();
+      setLieux((prev) =>
+        pageNumber === 1 ? newLieux : [...prev, ...newLieux]
+      );
 
-        setPhotoUri(null);
-        setLocation(null);
-        
-
-        Alert.alert('Succès', 'Entrée sauvegardée avec succès.');
+      if (response.data.info.next === null) {
+        setHasMore(false);
       }
-    } catch (error) {
-      Alert.alert('Erreur', 'Erreur serveur (HTTP 500).');
+    } catch (err: any) {
+      setError(err.message || 'Une erreur est survenue');
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
+      setIsFetchingMore(false);
     }
   };
+
+  useEffect(() => {
+    fetchLieux(1);
+  }, []);
+
+  useEffect(() => {
+    if (page > 1) {
+      fetchLieux(page);
+    }
+  }, [page]);
+
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery]);
+
+  const handleLoadMore = () => {
+    if (!isLoading && !isFetchingMore && hasMore) {
+      setIsFetchingMore(true);
+      setPage((prev) => prev + 1);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" />
+        <Text style={styles.loadingText}>Chargement...</Text>
+        <StatusBar style="auto" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Erreur : {error}</Text>
+        <StatusBar style="auto" />
+      </View>
+    );
+  }
 
   return (
-    <SafeAreaView>
-      <ScrollView>
-        <Text style={styles.header}>Créer un incident</Text>
-
-        <Text style={styles.label}>1. Preuve Photographique</Text>
-
-        {photoUri ? (
-          <View style={styles.previewContainer}>
-            <Image source={{ uri: photoUri }} style={styles.image} />
-            <TouchableOpacity
-              style={styles.retryButton}
-              onPress={() => setPhotoUri(null)}
-            >
-              <Text style={styles.retryButtonText}>Reprendre la photo</Text>
-            </TouchableOpacity>
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={filteredLieux}
+        keyExtractor={(item) => item.id.toString()}
+        ListHeaderComponent={
+          <View>
+            <TextInput
+              placeholder="Rechercher un lieu..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              style={styles.searchInput}
+            />
           </View>
-        ) : (
-          <View style={styles.cameraContainer}>
-            <CameraCapture onPictureTaken={setPhotoUri} />
-          </View>
-        )}
-
-        <Text style={styles.label}>2. Localisation</Text>
-        <LocationMap onLocationFound={setLocation} />
-
-        {!location || !photoUri ? null : (
-          <View style={styles.submitContainer}>
-          {isSubmitting ? (
-            <ActivityIndicator size="large" />
-          ) : (
-            <Button title="Sauvegarder" onPress={handleSubmit} />
-          )}
-        </View>
-        )
         }
-      </ScrollView>
+        renderItem={({ item }) => (
+          <LieuCard
+            lieu={item}
+            onPress={() => navigation.navigate('LieuDetail', { lieu: item })}
+          />
+        )}
+        contentContainerStyle={{ padding: 5 }}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          isFetchingMore ? (
+            <ActivityIndicator size="small" style={styles.footerLoader} />
+          ) : null
+        }
+      />
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: '#fff',
+    paddingTop: 50,
+    paddingHorizontal: 20,
   },
-  header: {
+  title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    textAlign: 'center',
   },
-  label: {
-    fontSize: 18,
-    marginBottom: 12,
-    marginTop: 16,
+  loadingText: {
+    marginTop: 10,
+    textAlign: 'center',
   },
-  previewContainer: {
+  errorText: {
+    color: 'red',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  card: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 20,
-  },
-  image: {
-    width: 300,
-    height: 300,
+    padding: 12,
+    marginBottom: 12,
+    backgroundColor: '#f2f2f2',
     borderRadius: 10,
   },
-  retryButton: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: '#007BFF',
-    borderRadius: 5,
+  image: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    marginRight: 12,
   },
-  retryButtonText: {
-    color: 'white',
-    fontSize: 16,
+  name: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
-  cameraContainer: {
-    marginVertical: 20,
-  },
-  input: {
-    borderWidth: 1,
+  searchInput: {
+    height: 40,
     borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 12,
-    minHeight: 100,
-    textAlignVertical: 'top',
-    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 10,
   },
-  submitContainer: {
-    marginTop: 24,
-    marginBottom: 30,
+  footerLoader: {
+    marginVertical: 20,
   },
 });

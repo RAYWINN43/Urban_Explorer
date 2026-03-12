@@ -1,6 +1,6 @@
 export interface Coordinates {
-  latitude: number;
-  longitude: number;
+  lat: number;
+  lon: number;
 }
 
 export interface ApiResponse<T> {
@@ -13,9 +13,17 @@ export interface LocationMapProps {
     onLocationFound: (coords: Coordinates) => void;
 }
 
-export interface Incident {
+
+
+export interface Lieu {
     id?: string;
-    photoUri: string | null;
+    title: string | null;
     location: Coordinates | null;
-    timestamp: number;
+    description: string | null;
+    cover_url: string | null;
+    addressName: string | null;
+    addressStreet: string | null;
+    addressZipcode: string | null;
+    addressCity: string | null;
+    price: number | null;
 }

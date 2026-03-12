@@ -7,6 +7,7 @@ export interface ApiResponse<T> {
     success: boolean;
     data?: T;
     error?: string;
+    results: T[];
 }
 
 export interface LocationMapProps {
@@ -18,7 +19,7 @@ export interface LocationMapProps {
 export interface Lieu {
     id?: string;
     title: string | null;
-    location: Coordinates | null;
+    lat_lon: Coordinates;
     description: string | null;
     cover_url: string | null;
     addressName: string | null;

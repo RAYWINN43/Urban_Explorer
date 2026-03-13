@@ -58,6 +58,12 @@ export const LocationMap: React.FC<LocationMapProps> = () => {
   useEffect(() => {
     fetchLieux();
   }, []);
+
+  const resetSelectedMarker = async () =>
+  {
+    setSelectedMarker(null)
+    setLastPressedMarker('')
+  }
   
 
   if (isLoading) {
@@ -95,7 +101,8 @@ export const LocationMap: React.FC<LocationMapProps> = () => {
 
   return (
     <View style={styles.mapContainer}>
-      <MapView style={styles.map} initialRegion={initialRegion}>
+      <MapView style={styles.map} initialRegion={initialRegion}
+      onPress = {() => setLastPressedMarker('')}>
         {lieux.map((location) => 
           <Marker coordinate={{
             latitude:location.lat_lon.lat,
@@ -118,7 +125,7 @@ export const LocationMap: React.FC<LocationMapProps> = () => {
 
       <Modal
         isVisible={!!selectedMarker}
-        onBackdropPress={() => setSelectedMarker(null)}
+        onBackdropPress={() => resetSelectedMarker()}
         style={styles.modal}
       >
         <ScrollView style={styles.callout}>
@@ -126,7 +133,7 @@ export const LocationMap: React.FC<LocationMapProps> = () => {
           <Text>{selectedMarker?.description?.replace(/<[^>]*>/g,'')}</Text>
           <TouchableOpacity
             style={styles.closeButton}
-            onPress={() => setSelectedMarker(null)}
+            onPress={() => resetSelectedMarker()}
           >
             <Text>Fermer</Text>
           </TouchableOpacity>

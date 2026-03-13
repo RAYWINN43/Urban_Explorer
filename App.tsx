@@ -40,27 +40,27 @@ function TabNavigator() {
 export default function App() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
-    <NavigationContainer>
-      <Stack.Navigator>
+      <NavigationContainer>
+        <Stack.Navigator>
 
-        {/* Tabs */}
-        <Stack.Screen
-          name="Retour"
-          component={TabNavigator}
-          options={{ headerShown: false }}
-        />
+          {/* Tabs */}
+          <Stack.Screen
+            name="Retour"
+            component={TabNavigator}
+            options={{ headerShown: false }}
+          />
 
-        {/* écran détail */}
-        <Stack.Screen
-          name="LieuDetail"
-          component={LieuDetailScreen}
-          options={{ title: "Détail du lieu" }}
-        />
+          {/* écran détail */}
+          <Stack.Screen
+            name="LieuDetail"
+            component={LieuDetailScreen}
+            options={{ title: "Détail du lieu" }}
+          />
 
-      </Stack.Navigator>
+        </Stack.Navigator>
 
-      <StatusBar style="auto" />
-    </NavigationContainer>
+        <StatusBar style="auto" />
+      </NavigationContainer>
     </SafeAreaView>
   );
 }

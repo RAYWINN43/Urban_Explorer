@@ -62,18 +62,7 @@ export const ProfilScreen: React.FC = () => {
       setIsSaving(false);
     }
   };
-
-  const handleResetPhoto = async () => {
-    try {
-      await AsyncStorage.removeItem(PHOTO_KEY);
-      setPhotoUri(null);
-      setShowCamera(false);
-      setIsSaving(false);
-    } catch (error) {
-      console.log('Erreur suppression photo :', error);
-    }
-  };
-
+  
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>Photo de profil</Text>

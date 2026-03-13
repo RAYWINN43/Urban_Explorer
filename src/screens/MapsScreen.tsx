@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   StyleSheet,
-  ScrollView,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { LocationMap } from '../components/LocationMap';
 
 export const MapsScreen: React.FC = () => {
@@ -12,7 +10,3 @@ export const MapsScreen: React.FC = () => {
     <LocationMap/>
   );
 };
-
-const styles = StyleSheet.create({
-  
-});

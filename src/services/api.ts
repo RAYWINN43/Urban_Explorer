@@ -1,4 +1,3 @@
-import { Alert } from 'react-native';
 import axios, { AxiosError } from 'axios';
 
 const apiClient = axios.create({

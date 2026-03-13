@@ -50,8 +50,6 @@ export const LocationMap: React.FC<LocationMapProps> = () => {
       setLieux(response.data.results)
     } catch (err: any) {
       setErrorMsg(err.message || 'Une erreur est survenue');
-    } finally {
-      //setIsLoading(false);
     }
   };
 
@@ -82,22 +80,13 @@ export const LocationMap: React.FC<LocationMapProps> = () => {
       </View>
     );
   }
-
-  /*// Si on veut centrer la position sur Paris
-  const initialRegion: Region = {
-    latitude: 48.8566, 
-    longitude: 2.3522,
-    latitudeDelta: 0.05,
-    longitudeDelta: 0.05,
-  };//*/
-
-  // Si on veut centrer la position sur l'utilisateur
+ 
   const initialRegion: Region = {
     latitude: userLocation.lat, 
     longitude: userLocation.lon,
     latitudeDelta: 0.05,
     longitudeDelta: 0.05,
-  };//*/
+  };
 
   return (
     <View style={styles.mapContainer}>

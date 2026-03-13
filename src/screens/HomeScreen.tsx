@@ -2,12 +2,12 @@ import { StatusBar } from 'expo-status-bar';
 import {
   ActivityIndicator,
   FlatList,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useRef, useState } from 'react';
 import apiClient from '../services/api';
 import { Lieu } from '../types';

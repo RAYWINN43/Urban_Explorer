@@ -62,7 +62,6 @@ export default function LieuDetailScreen({ route }: Props) {
         return;
       }
 
-      // fusion date + heure
       const startDate = new Date(date);
       startDate.setHours(time.getHours());
       startDate.setMinutes(time.getMinutes());
@@ -115,7 +114,6 @@ export default function LieuDetailScreen({ route }: Props) {
         </Text>
       }
 
-      {/* Sélection date */}
       <View style={styles.dateContainer}>
         <Button
           title={`Choisir la date : ${date.toLocaleDateString()}`}
@@ -131,7 +129,6 @@ export default function LieuDetailScreen({ route }: Props) {
         )}
       </View>
 
-      {/* Sélection heure */}
       <View style={styles.dateContainer}>
         <Button
           title={`Choisir l'heure : ${time.toLocaleTimeString()}`}

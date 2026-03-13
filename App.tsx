@@ -43,14 +43,12 @@ export default function App() {
       <NavigationContainer>
         <Stack.Navigator>
 
-          {/* Tabs */}
           <Stack.Screen
             name="Retour"
             component={TabNavigator}
             options={{ headerShown: false }}
           />
 
-          {/* écran détail */}
           <Stack.Screen
             name="LieuDetail"
             component={LieuDetailScreen}

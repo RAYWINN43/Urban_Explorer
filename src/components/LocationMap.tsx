@@ -110,9 +110,6 @@ export const LocationMap: React.FC<LocationMapProps> = () => {
               lastPressedMarker!=location.id? setLastPressedMarker(location.id) :
               setSelectedMarker(location)}}/>
         )}
-        <Marker coordinate={{ latitude: 48.9566, longitude: 2.3522 }}>
-          
-        </Marker>
         <Marker coordinate={initialRegion}
         pinColor="red"
         isPreselected={true}
